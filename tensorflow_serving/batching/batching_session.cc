@@ -609,7 +609,6 @@ void BatchingSession::ProcessBatch(
   std::vector<Tensor> combined_outputs;
   RunMetadata run_metadata;
 
-
   auto time_start = std::chrono::steady_clock::now();
   status = wrapped_->Run(run_options, merged_inputs, output_tensor_names,
                          {} /* target node names */, &combined_outputs,
