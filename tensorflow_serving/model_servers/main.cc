@@ -207,7 +207,7 @@ class PredictionServiceImpl final : public PredictionService::Service {
     auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(time_end - time_start).count();
     string model_name = request->model_spec().name();
     auto model_version = request->model_spec().version().value();
-    LOG(INFO) << "Request to " << model_name << " version " << model_version << " took " << duration_ms << " ms";
+    LOG(INFO) << "Request to " << model_name << " version " << model_version << " took " << duration_ms << " ms status " << status.error_code() << " " << status.error_message();
 
     if (!status.ok()) {
       VLOG(1) << "Predict failed: " << status.error_message();
