@@ -48,6 +48,7 @@ limitations under the License.
 #include <memory>
 #include <utility>
 #include <vector>
+#include <chrono>
 
 #include "google/protobuf/wrappers.pb.h"
 #include "grpc/grpc.h"
@@ -188,8 +189,16 @@ class PredictionServiceImpl final : public PredictionService::Service {
     // By default, this is infinite which is the same default as RunOptions.
     run_options.set_timeout_in_ms(
         DeadlineToTimeoutMillis(context->raw_deadline()));
+
+    auto time_start = std::chrono::steady_clock::now();
     const grpc::Status status = tensorflow::serving::ToGRPCStatus(
         predictor_->Predict(run_options, core_, *request, response));
+    auto time_end = std::chrono::steady_clock::now();
+    auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(time_end - time_start).count();
+    string model_name = request->model_spec().name();
+    auto model_version = request->model_spec().version().value();
+    LOG(INFO) << "Request to " << model_name << " version " << model_version << " took " << duration_ms << " ms";
+
     if (!status.ok()) {
       VLOG(1) << "Predict failed: " << status.error_message();
     }
