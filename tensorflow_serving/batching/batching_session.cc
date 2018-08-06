@@ -608,9 +608,15 @@ void BatchingSession::ProcessBatch(
       signature.output_tensors.begin(), signature.output_tensors.end());
   std::vector<Tensor> combined_outputs;
   RunMetadata run_metadata;
+
+  auto time_start = std::chrono::steady_clock::now();
   status = wrapped_->Run(run_options, merged_inputs, output_tensor_names,
                          {} /* target node names */, &combined_outputs,
                          &run_metadata);
+  auto time_end = std::chrono::steady_clock::now();
+  auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(time_end - time_start).count();
+  LOG(INFO) << "Processing batch of size " << batch->num_tasks() << " took " << duration_ms << " ms";
+
   for (int i = 0; i < batch->num_tasks(); ++i) {
     *(batch->mutable_task(i)->run_metadata) = run_metadata;
   }
